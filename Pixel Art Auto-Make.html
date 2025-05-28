@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Image to Pixel Art Converter</title>
+<style>
+  body {
+    margin: 0;
+    background: linear-gradient(135deg, #2c3e50, #4ca1af);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #eee;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* vertical centering */
+    min-height: 100vh;
+    padding: 1rem;
+    user-select: none;
+    text-align: center;
+  }
+  h1 {
+    margin-bottom: 1rem;
+    text-shadow: 0 0 8px #1abc9c;
+  }
+  h3 {
+    margin-bottom: 5px;
+    text-shadow: 0 0 8px #1abc9c;
+  }
+  #controls {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 900px;
+    width: 100%;
+  }
+  label {
+    font-size: 0.9rem;
+  }
+  input[type="file"] {
+    background: #1abc9c;
+    border: none;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    color: #222;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  input[type="number"] {
+    width: 50px;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    border: none;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  select {
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button {
+    background: #1abc9c;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 700;
+    color: #222;
+    cursor: pointer;
+    box-shadow: 0 0 8px #16a085;
+    transition: background 0.3s ease;
+  }
+  button:disabled, button[aria-disabled="true"] {
+    background: #555;
+    cursor: not-allowed;
+    box-shadow: none;
+    color: #999;
+  }
+  #canvasContainer {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+    max-width: 900px;
+    width: 100%;
+  }
+  .canvasBox {
+    background: #222;
+    border: 3px solid #1abc9c;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 0 20px #16a085;
+    width: 420px;
+    height: 420px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  canvas {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+    background: #000;
+    image-rendering: pixelated;
+  }
+  #downloadContainer {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    width: 100%;
+    max-width: 900px;
+    margin-top: 1rem;
+    flex-wrap: nowrap;
+  }
+  .downloadBox {
+    flex: 1;
+    display: flex;
+  }
+  .downloadBox.left {
+    justify-content: flex-end; /* Aligns button to the right under original canvas */
+  }
+  .downloadBox.right {
+    justify-content: flex-start; /* Aligns button to the left under remade canvas */
+  }
+  @media (max-width: 900px) {
+    #downloadContainer {
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .downloadBox {
+      justify-content: center !important;
+    }
+  }
+  @media (max-width: 900px) {
+    #canvasContainer {
+      flex-direction: column;
+      max-width: 100vw;
+    }
+    .canvasBox {
+      width: 90vw;
+      height: 90vw;
+      max-width: 420px;
+      max-height: 420px;
+    }
+  }
+  #socials {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 900px;
+    width: 100%;
+    margin-top: 0%;
+  }
+</style>
+</head>
+<body>
+
+<h1>Image to Pixel Art Converter</h1>
+
+<div id="controls" style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+  <!-- Upload on top -->
+  <input type="file" id="imageInput" accept="image/*" />
+
+  <!-- Pixel Size and Preset side-by-side below -->
+  <div style="display: flex; gap: 1rem;">
+    <div>
+      <label for="pixelSize">Pixel Size:</label>
+      <input type="number" id="pixelSize" min="1" max="128" value="8" />
+    </div>
+    <div>
+      <label for="presetSelect">Preset:</label>
+      <select id="presetSelect" aria-label="Pixel size presets"></select>
+    </div>
+  </div>
+</div>
+
+
+<div id="canvasContainer">
+  <div class="canvasBox" aria-label="Original uploaded image">
+    <canvas id="originalCanvas" width="400" height="400"></canvas>
+  </div>
+  <div class="canvasBox" aria-label="Pixel art remake image">
+    <canvas id="remadeCanvas" width="400" height="400"></canvas>
+  </div>
+</div>
+
+<div id="downloadContainer">
+  <div class="downloadBox left">
+    <button id="downloadFullBtn" disabled aria-disabled="true">Download Pixel Art</button>
+  </div>
+  <div class="downloadBox right">
+    <button id="downloadDinoBtn" disabled aria-disabled="true">Download as Dinopixel Save</button>
+  </div>
+</div>
+
+<h3>Made by yaboi_v3rt3x</h3>
+<div id="socials">
+  <a href="http://discordapp.com/users/590311423578603531" target="_blank">
+    <img src="Discord Icon.png" width="30px" height="30px">
+  </a>
+  <a href="https://github.com/yaboi-v3rt3x" target="_blank">
+    <img src="https://github.com/fluidicon.png" width="30px" height="30px">
+  </a>
+</div>
+
+<script>
+  const imageInput = document.getElementById('imageInput');
+  const originalCanvas = document.getElementById('originalCanvas');
+  const remadeCanvas = document.getElementById('remadeCanvas');
+  const originalCtx = originalCanvas.getContext('2d');
+  const remadeCtx = remadeCanvas.getContext('2d');
+  const pixelSizeInput = document.getElementById('pixelSize');
+  const presetSelect = document.getElementById('presetSelect');
+  const downloadFullBtn = document.getElementById('downloadFullBtn');
+  const downloadDinoBtn = document.getElementById('downloadDinoBtn');
+
+  let img = null;
+  let originalWidth = 0;
+  let originalHeight = 0;
+  let paddedWidth = 0;
+  let paddedHeight = 0;
+  let blockColors = [];
+
+  // Presets editable here
+  const presets = [
+    { name: 'Dinopixel', size: 8 }
+  ];
+
+  // Populate preset dropdown
+  function populatePresets() {
+    presetSelect.innerHTML = '<option value="">Custom</option>';
+    presets.forEach((p) => {
+      const opt = document.createElement('option');
+      opt.value = p.size;
+      opt.textContent = p.name;
+      presetSelect.appendChild(opt);
+    });
+    // Select default
+    presetSelect.value = '8';
+  }
+  populatePresets();
+
+  // Fit dimensions into square box maxSize while preserving aspect ratio
+  function fitDimensionsToSquare(w, h, maxSize) {
+    const ratio = w / h;
+    if (ratio > 1) {
+      return { w: maxSize, h: Math.round(maxSize / ratio) };
+    } else {
+      return { w: Math.round(maxSize * ratio), h: maxSize };
+    }
+  }
+
+  // Get the most frequent color in a pixel block as a CSS rgb() string
+  function getMostFrequentColor(imageData) {
+    const data = imageData.data;
+    const colorCount = {};
+    let maxCount = 0;
+    let dominantColor = null;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const a = data[i + 3];
+      if (a === 0) continue; // skip transparent pixels
+
+      const key = `${r},${g},${b}`;
+      colorCount[key] = (colorCount[key] || 0) + 1;
+
+      if (colorCount[key] > maxCount) {
+        maxCount = colorCount[key];
+        dominantColor = key;
+      }
+    }
+
+    if (!dominantColor) {
+      return 'rgba(0,0,0,0)'; // fully transparent block
+    }
+
+    return `rgb(${dominantColor})`;
+  }
+
+  // Draw and update preview canvases
+  function updatePreview() {
+    if (!img) return;
+
+    let pixelSize = Math.max(1, parseInt(pixelSizeInput.value));
+    if (isNaN(pixelSize)) pixelSize = 8;
+
+    // Display original image scaled down to fit 400x400
+    const origBoxSize = 400;
+    const origDim = fitDimensionsToSquare(originalWidth, originalHeight, origBoxSize);
+    originalCanvas.width = origDim.w;
+    originalCanvas.height = origDim.h;
+    originalCtx.clearRect(0, 0, originalCanvas.width, originalCanvas.height);
+    originalCtx.imageSmoothingEnabled = true;
+    originalCtx.drawImage(img, 0, 0, originalWidth, originalHeight, 0, 0, origDim.w, origDim.h);
+
+    // Padded dimensions for remade image
+    paddedWidth = Math.ceil(originalWidth / pixelSize) * pixelSize;
+    paddedHeight = Math.ceil(originalHeight / pixelSize) * pixelSize;
+    remadeCanvas.width = paddedWidth;
+    remadeCanvas.height = paddedHeight;
+    remadeCtx.clearRect(0, 0, paddedWidth, paddedHeight);
+    remadeCtx.imageSmoothingEnabled = false;
+
+    // Create a temporary canvas at full image size
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = originalWidth;
+    tempCanvas.height = originalHeight;
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCtx.drawImage(img, 0, 0, originalWidth, originalHeight);
+
+    blockColors = [];
+
+    for (let y = 0; y < paddedHeight; y += pixelSize) {
+      for (let x = 0; x < paddedWidth; x += pixelSize) {
+        const blockWidth = Math.min(pixelSize, originalWidth - x);
+        const blockHeight = Math.min(pixelSize, originalHeight - y);
+        if (blockWidth <= 0 || blockHeight <= 0) continue;
+
+        const imageData = tempCtx.getImageData(x, y, blockWidth, blockHeight);
+        const color = getMostFrequentColor(imageData);
+        blockColors.push(color);
+
+        remadeCtx.fillStyle = color;
+        remadeCtx.fillRect(x, y, pixelSize, pixelSize); // matches image space directly
+      }
+    }
+
+    // Scale remade Canvas visually for UI preview
+    let scaleFactor = 1;
+    if (paddedWidth > 400 || paddedHeight > 400) {
+      scaleFactor = Math.min(400 / paddedWidth, 400 / paddedHeight);
+    }
+    remadeCanvas.style.width = (paddedWidth * scaleFactor) + 'px';
+    remadeCanvas.style.height = (paddedHeight * scaleFactor) + 'px';
+
+    // Enable buttons
+    downloadFullBtn.disabled = false;
+    downloadFullBtn.setAttribute('aria-disabled', 'false');
+    downloadDinoBtn.disabled = false;
+    downloadDinoBtn.setAttribute('aria-disabled', 'false');
+  }
+
+  // Download the pixel art canvas as PNG
+  function downloadFullImage() {
+    const link = document.createElement('a');
+    link.download = 'pixel_art.png';
+    link.href = remadeCanvas.toDataURL('image/png');
+    link.click();
+  }
+
+  // Download as Dinopixel Save (.dino file)
+  downloadDinoBtn.addEventListener('click', async () => {
+    if (!blockColors.length) return;
+    const pixelSize = 8;
+    const blocksPerRow = paddedWidth / pixelSize;
+    const blocksPerCol = paddedHeight / pixelSize;
+
+    // Create full remade image canvas
+    const fullCanvas = document.createElement('canvas');
+    fullCanvas.width = paddedWidth;
+    fullCanvas.height = paddedHeight;
+    const fullCtx = fullCanvas.getContext('2d');
+    fullCtx.imageSmoothingEnabled = false;
+
+    for (let i = 0; i < blockColors.length; i++) {
+      const col = i % blocksPerRow;
+      const row = Math.floor(i / blocksPerRow);
+      fullCtx.fillStyle = blockColors[i];
+      fullCtx.fillRect(col * pixelSize, row * pixelSize, pixelSize, pixelSize);
+    }
+
+    // Create tiny 1-pixel-per-block canvas
+    const tinyCanvas = document.createElement('canvas');
+    tinyCanvas.width = blocksPerRow;
+    tinyCanvas.height = blocksPerCol;
+    const tinyCtx = tinyCanvas.getContext('2d');
+    tinyCtx.imageSmoothingEnabled = false;
+
+    for (let i = 0; i < blockColors.length; i++) {
+      const col = i % blocksPerRow;
+      const row = Math.floor(i / blocksPerRow);
+      tinyCtx.fillStyle = blockColors[i];
+      tinyCtx.fillRect(col, row, 1, 1);
+    }
+
+    // Convert canvas to Base64 data (PNG)
+    function canvasToBase64(canvas) {
+      return new Promise((resolve) => {
+        resolve(canvas.toDataURL('image/png').split(',')[1]);
+      });
+    }
+
+    const fullBase64 = await canvasToBase64(fullCanvas);
+    const tinyBase64 = await canvasToBase64(tinyCanvas);
+
+    // ✅ Corrected template string using backticks!
+    const fileContent = `${paddedWidth}_${paddedHeight}_8--dino--data:image/png;base64,${fullBase64}--dino--data:image/png;base64,${tinyBase64}`;
+
+    const blob = new Blob([fileContent], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'pixel_art.dino';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  // Handle file input
+  imageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      img = new Image();
+      img.onload = function() {
+        originalWidth = img.naturalWidth;
+        originalHeight = img.naturalHeight;
+
+        // Reset pixel size input and preset dropdown
+        pixelSizeInput.value = 8;
+        presetSelect.value = '';
+
+        updatePreview();
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Update preview on pixel size input change
+  pixelSizeInput.addEventListener('input', () => {
+    // Clear preset select if custom pixel size
+    const val = pixelSizeInput.value;
+    if (!presets.some(p => p.size == val)) {
+      presetSelect.value = '';
+    }
+    updatePreview();
+  });
+
+  // Update pixel size input when preset selected
+  presetSelect.addEventListener('change', () => {
+    const val = presetSelect.value;
+    if (val) {
+      pixelSizeInput.value = val;
+      updatePreview();
+    }
+  });
+
+  // Download buttons
+  downloadFullBtn.addEventListener('click', downloadFullImage);
+  downloadDinoBtn.addEventListener('click', downloadDinopixelSave);
+
+</script>
+</body>
+</html>
