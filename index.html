@@ -10,15 +10,16 @@
     background: linear-gradient(135deg, #2c3e50, #4ca1af);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #eee;
-
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    text-align: center;
+  }
+  #mainContent {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* vertical centering */
-    min-height: 100vh;
-    padding: 1rem;
-    user-select: none;
-    text-align: center;
   }
   h1 {
     margin-bottom: 1rem;
@@ -166,55 +167,52 @@
 </style>
 </head>
 <body>
+  <main id="mainContent">
+    <h1>Image to Pixel Art Converter</h1>
 
-<h1>Image to Pixel Art Converter</h1>
-
-<div id="controls" style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
-  <!-- Upload on top -->
-  <input type="file" id="imageInput" accept="image/*" />
-
-  <!-- Pixel Size and Preset side-by-side below -->
-  <div style="display: flex; gap: 1rem;">
-    <div>
-      <label for="pixelSize">Pixel Size:</label>
-      <input type="number" id="pixelSize" min="1" max="128" value="8" />
+    <div id="controls" style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+      <input type="file" id="imageInput" accept="image/*" />
+      <div style="display: flex; gap: 1rem;">
+        <div>
+          <label for="pixelSize">Pixel Size:</label>
+          <input type="number" id="pixelSize" min="1" max="128" value="8" />
+        </div>
+        <div>
+          <label for="presetSelect">Preset:</label>
+          <select id="presetSelect" aria-label="Pixel size presets"></select>
+        </div>
+      </div>
     </div>
-    <div>
-      <label for="presetSelect">Preset:</label>
-      <select id="presetSelect" aria-label="Pixel size presets"></select>
+
+    <div id="canvasContainer">
+      <div class="canvasBox" aria-label="Original uploaded image">
+        <canvas id="originalCanvas" width="400" height="400"></canvas>
+      </div>
+      <div class="canvasBox" aria-label="Pixel art remake image">
+        <canvas id="remadeCanvas" width="400" height="400"></canvas>
+      </div>
     </div>
-  </div>
-</div>
 
+    <div id="downloadContainer">
+      <div class="downloadBox left">
+        <button id="downloadFullBtn" disabled aria-disabled="true">Download Pixel Art</button>
+      </div>
+      <div class="downloadBox right">
+        <button id="downloadDinoBtn" disabled aria-disabled="true">Download as Dinopixel Save</button>
+      </div>
+    </div>
 
-<div id="canvasContainer">
-  <div class="canvasBox" aria-label="Original uploaded image">
-    <canvas id="originalCanvas" width="400" height="400"></canvas>
-  </div>
-  <div class="canvasBox" aria-label="Pixel art remake image">
-    <canvas id="remadeCanvas" width="400" height="400"></canvas>
-  </div>
-</div>
-
-<div id="downloadContainer">
-  <div class="downloadBox left">
-    <button id="downloadFullBtn" disabled aria-disabled="true">Download Pixel Art</button>
-  </div>
-  <div class="downloadBox right">
-    <button id="downloadDinoBtn" disabled aria-disabled="true">Download as Dinopixel Save</button>
-  </div>
-</div>
-
-<h3>Made by yaboi_v3rt3x</h3>
-<div id="socials">
-  <a href="http://discordapp.com/users/590311423578603531" target="_blank">
-    <img src="Discord Icon.png" width="30px" height="30px">
-  </a>
-  <a href="https://github.com/yaboi-v3rt3x" target="_blank">
-    <img src="https://github.com/fluidicon.png" width="30px" height="30px">
-  </a>
-</div>
-
+    <h3>Made by yaboi_v3rt3x</h3>
+    <div id="socials">
+      <a href="http://discordapp.com/users/590311423578603531" target="_blank">
+        <img src="Discord Icon.png" width="30px" height="30px">
+      </a>
+      <a href="https://github.com/yaboi-v3rt3x" target="_blank">
+        <img src="https://github.com/fluidicon.png" width="30px" height="30px">
+      </a>
+    </div>
+  </main>
+</body>
 <script>
   const imageInput = document.getElementById('imageInput');
   const originalCanvas = document.getElementById('originalCanvas');
@@ -301,7 +299,10 @@
 
     // Display original image scaled down to fit 400x400
     const origBoxSize = 400;
-    const origDim = fitDimensionsToSquare(originalWidth, originalHeight, origBoxSize);
+    let origDim = { w: originalWidth, h: originalHeight };
+    if (originalWidth > origBoxSize || originalHeight > origBoxSize) {
+      origDim = fitDimensionsToSquare(originalWidth, originalHeight, origBoxSize);
+    }
     originalCanvas.width = origDim.w;
     originalCanvas.height = origDim.h;
     originalCtx.clearRect(0, 0, originalCanvas.width, originalCanvas.height);
@@ -466,5 +467,4 @@
   downloadDinoBtn.addEventListener('click', downloadDinopixelSave);
 
 </script>
-</body>
 </html>
